@@ -11,9 +11,9 @@
 #include "Renderer/Renderer.hpp"
 #include "Renderer/Shader.hpp"
 #include "Renderer/Texture.hpp"
-#include "Renderer/Camera.hpp"
+// #include "Renderer/Camera.hpp"
 
-//#include "Core/CameraController.hpp"
+#include "Core/CameraController.hpp"
 
 
 #endif

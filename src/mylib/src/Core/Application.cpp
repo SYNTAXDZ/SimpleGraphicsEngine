@@ -35,7 +35,10 @@ void Application::OnEvent( Event& e ) {
 
     EventDispatcher dispatcher( e );
     dispatcher.Dispatch<WindowCloseEvent>( BIND_EVENT_FN( OnWindowClose ) );
-
+    dispatcher.Dispatch<WindowResizeEvent>( BIND_EVENT_FN( OnWindowResize ) );
+    
+    std::cout << "The Event: " << e << "\n";
+    
     for( auto it = m_LayerStack.end(); it != m_LayerStack.begin(); ) {
 
         (*--it )->OnEvent( e );
@@ -60,9 +63,12 @@ void Application::PushOverlay( Layer* overlay ) {
 }
 
 void Application::Run() {
-
+        
     while( m_Running ) {
-
+        
+        if( Input::IsKeyPressed( KEY_ESCAPE ) )
+            m_Running = false;
+        
         for( Layer* layer : m_LayerStack )
             layer->OnUpdate();
 
@@ -76,6 +82,14 @@ void Application::Run() {
 bool Application::OnWindowClose( WindowCloseEvent& e ) {
 
     m_Running = false;
+
+    return true;
+
+}
+
+bool Application::OnWindowResize( WindowResizeEvent& e ) {
+
+    Renderer::SetViewport( 0, 0, (unsigned int)e.GetWidth(), (unsigned int)e.GetHeight() );
 
     return true;
 

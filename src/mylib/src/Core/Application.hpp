@@ -27,6 +27,7 @@ namespace ENGINE {
     
     private:
         bool OnWindowClose( WindowCloseEvent& e );
+        bool OnWindowResize( WindowResizeEvent& e );
     private:
         bool m_Running = true;
         std::unique_ptr<Window> m_Window;
