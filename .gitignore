@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
-
+*.projectile
+*.ccls-cache
+/build
 # Compiled Object files
 *.slo
 *.lo
