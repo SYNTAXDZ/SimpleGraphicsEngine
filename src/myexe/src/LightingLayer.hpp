@@ -1,61 +1,91 @@
+#pragma once
+
 #include "mylib.hpp"
 #include <glad/glad.h>
 
-class LightingLayer : public ENGINE::Layer {
+using namespace ENGINE;
+
+class LightingLayer : public Layer {
 
 public:
-    LightingLayer() : Layer(  "Lightinglayer" ) {}
+    LightingLayer() : Layer(  "Lightinglayer" ), m_CameraController( 800.0f/600.0f ) {}
     virtual ~LightingLayer() = default;
 
     virtual void OnAttach() override {
 
-         float vertices[] = {
-        
-            // Front Backward Face  // Normals: are perpendicular vectors on each vertex
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f, 
-            0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f, 
-            0.5f,  0.5f, -0.5f,    0.0f, 0.0f, -1.0f, 
-            0.5f,  0.5f, -0.5f,    0.0f, 0.0f, -1.0f, 
-            -0.5f,  0.5f, -0.5f,    0.0f, 0.0f, -1.0f, 
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, -1.0f, 
-            // Front Forward Face
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,  1.0f, 
-            0.5f, -0.5f,  0.5f,    0.0f, 0.0f,  1.0f, 
-            0.5f,  0.5f,  0.5f,    0.0f, 0.0f,  1.0f, 
-            0.5f,  0.5f,  0.5f,    0.0f, 0.0f,  1.0f, 
-            -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,  1.0f, 
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,  1.0f, 
-            // Left Face
-            -0.5f,  0.5f,  0.5f,    -1.0f, 0.0f, 0.0f, 
-            -0.5f,  0.5f, -0.5f,    -1.0f, 0.0f, 0.0f, 
-            -0.5f, -0.5f, -0.5f,    -1.0f, 0.0f, 0.0f, 
-            -0.5f, -0.5f, -0.5f,    -1.0f, 0.0f, 0.0f, 
-            -0.5f, -0.5f,  0.5f,    -1.0f, 0.0f, 0.0f, 
-            -0.5f,  0.5f,  0.5f,    -1.0f, 0.0f, 0.0f, 
-            // Right Face
-            0.5f,  0.5f,  0.5f,    1.0f, 0.0f,  0.0f, 
-            0.5f,  0.5f, -0.5f,    1.0f, 0.0f,  0.0f, 
-            0.5f, -0.5f, -0.5f,    1.0f, 0.0f,  0.0f, 
-            0.5f, -0.5f, -0.5f,    1.0f, 0.0f,  0.0f, 
-            0.5f, -0.5f,  0.5f,    1.0f, 0.0f,  0.0f, 
-            0.5f,  0.5f,  0.5f,    1.0f, 0.0f,  0.0f, 
-            // Bottom Face
-            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f, 
-            0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f, 
-            0.5f, -0.5f,  0.5f,    0.0f, -1.0f, 0.0f, 
-            0.5f, -0.5f,  0.5f,    0.0f, -1.0f, 0.0f, 
-            -0.5f, -0.5f,  0.5f,    0.0f, -1.0f, 0.0f, 
-            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f, 0.0f, 
-            // Top Face
-            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f, 
-            0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f, 
-            0.5f,  0.5f,  0.5f,    0.0f, 1.0f, 0.0f, 
-            0.5f,  0.5f,  0.5f,    0.0f, 1.0f, 0.0f, 
-            -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, 0.0f, 
-            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f
-    
-        };
+        std::string vertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			
+            uniform mat4 u_Projection;
+            uniform mat4 u_View;
+            uniform mat4 u_Model;
 
+			void main()
+			{
+				gl_Position = u_Projection * u_View * u_Model * vec4(a_Position, 1.0);	
+			}
+		)";
+
+		std::string fragmentSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) out vec4 color;
+			
+
+			void main()
+			{
+                color = vec4( 0.5, 0.6, 0.5, 1.0 );
+			}
+		)";
+
+
+        float vertices[] = {
+
+            -0.5f, -0.5f, -0.5f,  
+            0.5f, -0.5f, -0.5f,   
+            0.5f,  0.5f, -0.5f,   
+            0.5f,  0.5f, -0.5f,   
+            -0.5f,  0.5f, -0.5f,  
+            -0.5f, -0.5f, -0.5f,  
+            // Front Forward Face
+            -0.5f, -0.5f,  0.5f,  
+            0.5f, -0.5f,  0.5f,   
+            0.5f,  0.5f,  0.5f,   
+            0.5f,  0.5f,  0.5f,   
+            -0.5f,  0.5f,  0.5f,  
+            -0.5f, -0.5f,  0.5f,  
+            // Left Face
+            -0.5f,  0.5f,  0.5f,  
+            -0.5f,  0.5f, -0.5f,  
+            -0.5f, -0.5f, -0.5f,  
+            -0.5f, -0.5f, -0.5f,  
+            -0.5f, -0.5f,  0.5f,  
+            -0.5f,  0.5f,  0.5f,  
+            // Right Face
+            0.5f,  0.5f,  0.5f,   
+            0.5f,  0.5f, -0.5f,   
+            0.5f, -0.5f, -0.5f,   
+            0.5f, -0.5f, -0.5f,   
+            0.5f, -0.5f,  0.5f,   
+            0.5f,  0.5f,  0.5f,   
+            // Bottom Face
+            -0.5f, -0.5f, -0.5f,  
+            0.5f, -0.5f, -0.5f,   
+            0.5f, -0.5f,  0.5f,   
+            0.5f, -0.5f,  0.5f,   
+            -0.5f, -0.5f,  0.5f,  
+            -0.5f, -0.5f, -0.5f,  
+            // Top Face
+            -0.5f,  0.5f, -0.5f,  
+            0.5f,  0.5f, -0.5f,   
+            0.5f,  0.5f,  0.5f,   
+            0.5f,  0.5f,  0.5f,   
+            -0.5f,  0.5f,  0.5f,  
+            -0.5f,  0.5f, -0.5f,  
+
+        };
         // set up veertex data and buffers
         glGenVertexArrays( 1, &VAO );
         glGenBuffers( 1, &VBO );
@@ -65,63 +95,70 @@ public:
         glBufferData( GL_ARRAY_BUFFER, sizeof( vertices ), vertices, GL_STATIC_DRAW );
 
         // Position Attribute
-        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( float ), ( GLvoid * )0 );
+        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( float ), ( GLvoid * )0 );
         glEnableVertexAttribArray( 0 );
 
 
-        glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( float ), ( GLvoid * )( 3 * sizeof( float ) ) );
-        glEnableVertexAttribArray( 1 );
+        // glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof( float ), ( GLvoid * )( 3 * sizeof( float ) ) );
+        // glEnableVertexAttribArray( 1 );
         // Color Attribute
-        m_Shader = ENGINE::Shader::Create("/home/syntax/Temp/Experiment/Engine/src/myexe/src/assets/shaders/lighting.glsl" );
-        //m_Texture = ENGINE::Texture::Create( "/home/syntax/Temp/Experiment/Engine/src/myexe/src/assets/textures/Checkerboard.png" );
+        //m_Shader = Shader::Create("/home/syntax/Knowledge/learn_cpp/MyRepos/SimpleGraphicsEngine/src/myexe/src/assets/shaders/lighting.glsl" );
+        
+        //auto width = Application::Get().GetWindow().GetNativeWindow().GetWidth();
+        //auto height = Application::Get().GetWindow().GetNativeWindow().GetHeight();
+        
+        // m_Camera = Camera( 45.0f, 800.0f/600.0f, 0.1f, 100.0f );
+        m_Shader = Shader::Create( "lightingPart", vertexSrc, fragmentSrc );        
+        //m_Texture = Texture::Create( "/home/syntax/Knowledge/learn_cpp/SimpleGraphicsEngine/src/myexe/src/assets/textures/Checkerboard.png" );
 
-        // m_PespectiveCamera = ENGINE::PerspectiveCamera( glm::vec3( 0.0f, 0.0f, 3.0f ) );
+        // m_PespectiveCamera = PerspectiveCamera( glm::vec3( 0.0f, 0.0f, 3.0f ) );
         // m_PespectiveCamera( glm::vec3( 0.0f, 0.0f, 3.0f ) );
         // m_Shader->UploadUniformMat4( "u_ViewProjection", m_CameraController.GetCamera().GetViewProjectionMatrix() );
         // m_Shader->UploadUniformMat4( "u_Transform ", glm::mat4(1.0f) );
         //m_Shader->UploadUniformInt("texture_sampler", 0);
 
     }
-    
+
     virtual void OnDettach() override {}
-    
+
     virtual void OnUpdate() override {
 
         // m_PespectiveCamera.OnUpdate();
-        // m_CameraController.OnUpdate();
+        m_CameraController.OnUpdate();
         // Render
         m_Shader->Bind();
         // m_Shader->UploadUniformMat4( "u_View", m_CameraController.GetCamera().GetViewMatrix() );
         // m_Shader->UploadUniformMat4( "u_ViewProjection", m_CameraController.GetCamera().GetViewProjectionMatrix() );
         // m_Shader->UploadUniformMat4( "u_Transform ", glm::mat4(1.0f) );
         // Clear the colorbuffer
-        ENGINE::Renderer::SetClearColor( { 0.1f, 0.1f, 0.1f, 1.0f } );
-        ENGINE::Renderer::Clear();
+        Renderer::SetClearColor( { 0.1f, 0.1f, 0.1f, 1.0f } );
+        Renderer::Clear();
 
-        // glm::mat4 ProjectionMatrix = m_PespectiveCamera.GetProjection();
-        // glm::mat4 ViewMatrix = m_PespectiveCamera.GetViewMatrix();
-        glm::mat4 ProjectionMatrix = glm::perspective( glm::radians(100.0f), 800.0f/600.0f, 0.1f, 100.0f );
-        glm::mat4 ViewMatrix(1.0f);
-        glm::mat4 ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
-        
-        m_Shader->UploadUniformMat4( "u_ViewProjection", ViewProjectionMatrix );
-        m_Shader->UploadUniformMat4( "u_Transform ", glm::mat4(1.0f) );
+        glm::mat4 Projection = m_CameraController.GetCamera().GetProjectionMatrix();
+        glm::mat4 View = m_CameraController.GetCamera().GetViewMatrix();
+        glm::mat4 Model = glm::mat4(1.0f);
+        Model = glm::translate( Model, glm::vec3( 0.0f, 0.0f, -5.0f ) );
+
+        m_Shader->UploadUniformMat4( "u_Projection", Projection );
+        m_Shader->UploadUniformMat4( "u_View", View );
+        m_Shader->UploadUniformMat4( "u_Model", Model );
         //m_Texture->Bind( 0 );
         glBindVertexArray( VAO );
         glDrawArrays( GL_TRIANGLES, 0, 36 );
 
     }
-    virtual void OnEvent( ENGINE::Event& e ) override {
+    virtual void OnEvent( Event& e ) override {
 
-        // m_CameraController.OnEvent( e );
+        m_CameraController.OnEvent( e );
 
     }
 
 private:
-    // ENGINE::CameraController m_CameraController;
-    // ENGINE::PerspectiveCamera m_PespectiveCamera;
-    std::shared_ptr<ENGINE::Shader> m_Shader;
-    //std::shared_ptr<ENGINE::Texture> m_Texture;
+    CameraController m_CameraController;
+    // PerspectiveCamera m_PespectiveCamera;
+    std::shared_ptr<Shader> m_Shader;
+    // Camera m_Camera;
+    //std::shared_ptr<Texture> m_Texture;
     unsigned int VAO, VBO;
 
 };

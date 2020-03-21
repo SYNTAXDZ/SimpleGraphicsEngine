@@ -1,19 +1,15 @@
 #type vertex
 #version 440 core
 layout(location = 0) in vec3 a_Position;
-layout( location = 1 ) in vec3 a_Normals;
-// layout( location = 1 ) in vec2 a_TexCoords;
-//uniform mat4 u_View;
-uniform mat4 u_ViewProjection;
-uniform mat4 u_Transform;
-//out vec2 v_TexCoords;
-out vec3 v_Normals;
+layout( location = 1 ) in vec2 a_TexCoords;
+//uniform mat4 u_ViewProjection;
+//uniform mat4 u_Transform;
+out vec2 v_TexCoords;
 
 void main() {
-	gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-    // gl_Position = vec4( a_Position, 1.0 );
-    //TexCoords = a_TexCoords;
-    v_Normals = a_Normals;
+	//gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+    v_Normals = a_TexCoords;
+    gl_Position = vec4( a_Position, 1.0 );
 }
 #type fragment
 #version 440 core
@@ -22,13 +18,13 @@ layout(location = 0) out vec4 color;
 
 //uniform vec4 u_Color;
 
-//in vec2 v_TexCoords;
-in vec3 v_Normals;
-//uniform sampler2D texture_sampler;
+in vec2 v_TexCoords;
+
+uniform sampler2D texture_sampler;
 
 void main() {
 	
-    color = vec4( 0.5, 0.6, 0.5, 1.0 );
-    //color = texture( texture_sampler, TexCoords );
+    color = texture( texture_sampler, v_TexCoords );
+    //color = vec4( 0.5, 0.6, 0.5, 1.0 );
 
 }

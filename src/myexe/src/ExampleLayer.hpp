@@ -10,9 +10,41 @@ public:
 
     virtual void OnAttach() override {
 
+        std::string vertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoords;
+			
+            out vec2 v_TexCoords;
+			//out vec4 v_Color;
+			//uniform mat4 u_ViewProjection;
+			void main()
+			{
+				v_TexCoords = a_TexCoords;
+				//v_Color = a_Color;
+				gl_Position = vec4(a_Position, 1.0);	
+			}
+		)";
+
+		std::string fragmentSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) out vec4 color;
+			in vec2 v_TexCoords;
+			
+            uniform sampler2D texSampler;
+
+			void main()
+			{
+				//color = vec4(v_Position * 0.5 + 0.5, 1.0);
+				color = texture( texSampler, v_TexCoords );
+			}
+		)";
+
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glEnable( GL_DEPTH_TEST );
+        // glEnable( GL_DEPTH_TEST );
 
         float vertices[5 * 3] = {
 		    -0.5f, -0.5f, 0.0f, -1.0f, -1.0f,
@@ -36,8 +68,9 @@ public:
         glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof( float ), ( GLvoid * )( 3 * sizeof( float ) ) );
         glEnableVertexAttribArray( 1 );
         // Color Attribute
-        m_Shader = ENGINE::Shader::Create("/home/syntax/Temp/Experiment/Engine/src/myexe/src/assets/shaders/example.glsl" );
-        m_Texture = ENGINE::Texture::Create( "/home/syntax/Temp/Experiment/Engine/src/myexe/src/assets/textures/Checkerboard.png" );
+        m_Shader = ENGINE::Shader::Create("example", vertexSrc ,fragmentSrc );
+        //m_Shader = ENGINE::Shader::Create( "/home/syntax/Knowledge/learn_cpp/MyRepos/SimpleGraphicsEngine/src/myexe/src/assets/shaders/lighting.glsl"  );
+        m_Texture = ENGINE::Texture::Create( "/home/syntax/Knowledge/learn_cpp/MyRepos/SimpleGraphicsEngine/src/myexe/src/assets/textures/Checkerboard.png" );
 
         m_Shader->UploadUniformInt("texture_sampler", 0);
 

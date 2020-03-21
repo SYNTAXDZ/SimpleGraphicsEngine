@@ -10,7 +10,7 @@ class Sandbox : public Application {
 public:
     Sandbox() {
 
-        //PushLayer( new ExampleLayer() );
+        // PushLayer( new ExampleLayer() );
         PushLayer( new LightingLayer() );
 
     }
