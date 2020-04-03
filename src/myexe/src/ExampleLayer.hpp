@@ -70,7 +70,7 @@ public:
         // Color Attribute
         m_Shader = ENGINE::Shader::Create("example", vertexSrc ,fragmentSrc );
         //m_Shader = ENGINE::Shader::Create( "/home/syntax/Knowledge/learn_cpp/MyRepos/SimpleGraphicsEngine/src/myexe/src/assets/shaders/lighting.glsl"  );
-        m_Texture = ENGINE::Texture::Create( "/home/syntax/Knowledge/learn_cpp/MyRepos/SimpleGraphicsEngine/src/myexe/src/assets/textures/Checkerboard.png" );
+        m_Texture = ENGINE::Texture2D::Create( "/home/syntax/Knowledge/learn_cpp/MyRepos/SimpleGraphicsEngine/src/myexe/src/assets/textures/Checkerboard.png" );
 
         m_Shader->UploadUniformInt("texture_sampler", 0);
 
@@ -102,7 +102,7 @@ public:
 
 private:
     std::shared_ptr<ENGINE::Shader> m_Shader;
-    std::shared_ptr<ENGINE::Texture> m_Texture;
+    std::shared_ptr<ENGINE::Texture2D> m_Texture;
     unsigned int VAO, VBO;
 
 };

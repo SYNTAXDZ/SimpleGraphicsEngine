@@ -3,15 +3,14 @@
 layout(location = 0) out vec4 color;
 // out vec4 color;
 
-in vec2 v_TexCoords;
-in vec3 v_Normals;
+in vec3 v_TexCoords;
 
-uniform sampler2D texture_sampler;
+uniform samplerCube skybox;
 
 void main() {
 	
     //color = vec4( gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0 );
     
-    color = texture( texture_sampler, v_TexCoords );
+    color = texture( skybox, v_TexCoords );
 
 }

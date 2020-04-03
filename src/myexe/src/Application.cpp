@@ -1,7 +1,9 @@
-// #include "mylib.hpp"
-#include "ExampleLayer.hpp"
-#include "LightingLayer.hpp"
-#include "Core/EntryPoint.hpp"
+//#include "ExampleLayer.hpp"
+//#include "PointLightLayer.hpp"
+//#include "ModelLayer.hpp"
+// #include "AdvencedGLLayer.hpp"
+#include "CubeMapLayer.hpp"
+
 
 using namespace ENGINE;
 
@@ -11,7 +13,7 @@ public:
     Sandbox() {
 
         // PushLayer( new ExampleLayer() );
-        PushLayer( new LightingLayer() );
+        PushLayer( new CubemapLayer() );
 
     }
     ~Sandbox() {}

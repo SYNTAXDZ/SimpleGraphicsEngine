@@ -142,6 +142,7 @@ std::string Shader::ReadFile( const std::string& filepath ) {
     std::string result;
 
     std::ifstream in( filepath, std::ios::in | std::ios::binary );
+
     if( in ) {
 
         in.seekg( 0, std::ios::end );
@@ -152,12 +153,12 @@ std::string Shader::ReadFile( const std::string& filepath ) {
 
     } else {
 
-        std::cout << "not able to read the file \n";
+        std::cout<< "Could not open the file \n";
 
     }
 
     return result;
-
+    
 }
 
 // PreProcess the Shader Source
@@ -165,33 +166,41 @@ std::unordered_map<GLenum, std::string> Shader::PreProcess( const std::string& s
 
     std::unordered_map<GLenum, std::string> shaderSources;
 
-    // the word that we use to set the shader type
+    // the token type, it mean after this token is the type of the shader
     const char* typeToken = "#type";
     size_t typeTokenLen = strlen( typeToken );
-    // find in our all shader source code for the typeToken from the type declaration
-    size_t pos = source.find( typeToken, 0 );
+    // find in our all shader source code for the typeToken
+    size_t pos = source.find( typeToken, 0 );  //Start of shader type declaration line
 
-    // kepping finding the typeToken
+    // while we keep finding it
     while( pos != std::string::npos ) {
 
-        // first instance of newline
-        size_t eol = source.find_first_of( "\r\n", pos );
-        // if( eol != std::string::npos ) std::cout << "Syntax Error \n";
-        // get the begining of the typeToken
-        size_t begin = pos + typeTokenLen + 1;
-        // get the type of the shader
+        // find the first instance of the new line, will give us the pos of the new line
+        size_t eol = source.find_first_of( "\r\n", pos );  //End of shader type declaration line
+        // if we don't have a new line ASSERT a Syntax Error
+        //HZ_CORE_ASSERT( eol != std::string::npos, "Syntax Error" );
+        // get the begining of our type
+        size_t begin = pos + typeTokenLen + 1; //Start of shader type name (after "#type " keyword)
+        // the type is simply the sub string between begin and begin minus end of the line.
         std::string type = source.substr( begin, eol - begin );
-        // get the nextLine from eol
-        size_t nextLinePos = source.find_first_not_of( "\r\n", eol );
-        // find the next tokenType
+        //HZ_CORE_ASSERT( ShaderTypeFromString( type ), "Invalid Shader type Specified" );
+
+        // nextLine is actually the first new line after 'eol'
+        size_t nextLinePos = source.find_first_not_of( "\r\n", eol ); //Start of shader code after shader type declaration line
+        // find the next type token in the new line
         pos = source.find( typeToken, nextLinePos );
+
         // get the sub string from the newLinePos to the end of the file or just the actual line pos
-        shaderSources[ShaderTypeFromString( type )] = ( pos == std::string::npos ) ? source.substr( nextLinePos ) : source.substr( nextLinePos, pos - nextLinePos );
+        //shaderSources[ShaderTypeFromString( type )] = 
+        //source.substr( nextLinePos, pos - ( nextLinePos == std::string::npos? source.size() - 1 : nextLinePos ) );
+
+        shaderSources[ShaderTypeFromString( type )] =
+				( pos == std::string::npos ) ? source.substr( nextLinePos ) : source.substr( nextLinePos, pos - nextLinePos );
 
     }
 
     return shaderSources;
-
+   
 }
 
 void Shader::Bind() const {

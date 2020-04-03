@@ -37,7 +37,7 @@ void Application::OnEvent( Event& e ) {
     dispatcher.Dispatch<WindowCloseEvent>( BIND_EVENT_FN( OnWindowClose ) );
     dispatcher.Dispatch<WindowResizeEvent>( BIND_EVENT_FN( OnWindowResize ) );
     
-    std::cout << "The Event: " << e << "\n";
+    //std::cout << "The Event: " << e << "\n";
     
     for( auto it = m_LayerStack.end(); it != m_LayerStack.begin(); ) {
 

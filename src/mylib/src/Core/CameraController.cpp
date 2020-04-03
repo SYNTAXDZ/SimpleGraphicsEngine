@@ -11,10 +11,11 @@
 using namespace ENGINE;
 
 
-bool firstMouse = true;
+inline bool firstMouse = true;
 
-float lastX = 400;
-float lastY = 300;
+
+inline float lastX = 400;
+inline float lastY = 300;
 
 CameraController::CameraController( float aspectRatio )
 : m_AspectRatio( aspectRatio ), m_Camera( m_ZoomLevel, m_AspectRatio, 0.1f, 100.0f ) {}
