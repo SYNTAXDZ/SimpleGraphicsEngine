@@ -10,16 +10,22 @@ namespace ENGINE {
 
     public:
         Texture2D( const std::string& path );
+        Texture2D( const std::string& path, bool isGammaCorrected );
         Texture2D( std::vector<std::string> faces );
         ~Texture2D();
+
+        inline unsigned int GetID() const { return m_RendererID; }
 
         inline unsigned int GetWidth() const { return m_Width; }
         inline unsigned int GetHeight() const { return m_Height; }
 
         void Bind( unsigned int slot ) const;
         void Bind() const;
+        void UnBind() const;
+
 
         static std::shared_ptr<Texture2D> Create( const std::string& path );
+        static std::shared_ptr<Texture2D> Create( const std::string& path, bool isGamma );
         static std::shared_ptr<Texture2D> Create( std::vector<std::string> faces );
 
     private:

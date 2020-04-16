@@ -7,15 +7,16 @@
 
 using namespace ENGINE;
 
-class CubemapLayer : public Layer {
+class AdvencedLightingLayer : public Layer {
 
 public:
-    CubemapLayer() : Layer(  "CubemapLayer" ),
+    AdvencedLightingLayer() : Layer(  "AdvencedLayer" ),
      m_CameraController( 800.0f/600.0f ) {}
-    virtual ~CubemapLayer() = default;
+    virtual ~AdvencedLightingLayer() = default;
 
     virtual void OnAttach() override {
 
+        // set up vertex data and buffers
         glGenVertexArrays( 1, &m_VAO );
         glGenBuffers( 1, &m_VBO );
         // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
@@ -30,11 +31,10 @@ public:
         
         glEnableVertexAttribArray( 1 );
         glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( GLvoid * )( 3 * sizeof( float ) ) );
-       
-        /* 
+        
         glEnableVertexAttribArray( 2 );
         glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( GLvoid * )( 6 * sizeof( float ) ) );
-        */
+        
         glBindVertexArray( 0 );
 
         // set up vertex data and buffers
@@ -60,49 +60,28 @@ public:
         glEnableVertexAttribArray( 0 );
         glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( GLvoid * )0 );
 
+        glEnableVertexAttribArray( 1 );
+        glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( GLvoid* )( 3 * sizeof( float ) ) );
+
         glEnableVertexAttribArray( 2 );
         glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof( float ), ( GLvoid * )( 6 * sizeof( float ) ) );
-        glBindVertexArray( 0 );
 
-        // set up vertex data and buffers
-        glGenVertexArrays( 1, &m_SkyboxVAO );
-        glGenBuffers( 1, &m_SkyboxVBO );
-        // Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
-        glBindVertexArray( m_SkyboxVAO );
-        glBindBuffer( GL_ARRAY_BUFFER, m_SkyboxVBO );
-        glBufferData( GL_ARRAY_BUFFER, sizeof( skyboxVertices ), skyboxVertices, GL_STATIC_DRAW );
-        // Position Attribute
-        glEnableVertexAttribArray( 0 );
-        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof( float ), ( GLvoid * )0 );
         glBindVertexArray( 0 );
-
-        std::string vertexPath = "/shaders/example.vert";
-        std::string fragmentPath = "/shaders/example.frag";
+        
+        std::string vertexPath = "/shaders/lighting.vert";
+        std::string fragmentPath = "/shaders/lighting.frag";
         std::string texPath = "/textures/container2.png";
         
         std::string vertexShaderPath = GetPath( vertexPath );
         std::string fragmentShaderPath = GetPath( fragmentPath );
         std::string texturePath = GetPath( texPath );
-        std::string marbleTexture = GetPath( "/textures/marble.jpg" );
+        std::string woodTexture = GetPath( "/textures/wood.png" );
 
         std::string vertexScreen = GetPath( "/shaders/screen.vert" );
         std::string fragmentScreen = GetPath( "/shaders/screen.frag" );
-
-        std::string skyboxVertex = GetPath( "/shaders/cubemap.vert" );
-        std::string skyboxFragment = GetPath( "/shaders/cubemap.frag" );
-        
-        std::vector<std::string> faces {
-            GetPath( "/textures/skybox/right.jpg" ),
-            GetPath( "/textures/skybox/left.jpg" ),
-            GetPath( "/textures/skybox/top.jpg" ),
-            GetPath( "/textures/skybox/bottom.jpg" ),
-            GetPath( "/textures/skybox/front.jpg" ),
-            GetPath( "/textures/skybox/back.jpg" )
-        };       
         
         m_Shader = std::make_shared<CShader>( vertexShaderPath.c_str(), fragmentShaderPath.c_str() );
         m_ScreenShader = std::make_shared<CShader>( vertexScreen.c_str(), fragmentScreen.c_str() );
-        m_SkyboxShader = std::make_shared<CShader>( skyboxVertex.c_str(), skyboxFragment.c_str() );
         
         glGenFramebuffers( 1, &m_Framebuffer );
         glBindFramebuffer( GL_FRAMEBUFFER, m_Framebuffer );
@@ -126,11 +105,8 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
         m_Texture = Texture2D::Create( texturePath );
-        m_PlaneTexture = Texture2D::Create( marbleTexture );
-        m_SkyboxTexture = Texture2D::Create( faces );
-        m_Shader->SetUniformInt( "u_SkyBox", 0 );
-        m_SkyboxShader->SetUniformInt( "skybox", 0 );
-
+        m_PlaneTexture = Texture2D::Create( woodTexture, true );
+        
     }
 
     virtual void OnDettach() override {}
@@ -138,7 +114,7 @@ public:
     virtual void OnUpdate() override {
 
         m_CameraController.OnUpdate();
-        
+
         glBindFramebuffer( GL_FRAMEBUFFER, m_Framebuffer );
         glEnable( GL_DEPTH_TEST );
         
@@ -152,44 +128,36 @@ public:
         Model = glm::translate( Model, glm::vec3( 0.0f, 0.0f, -1.0f ) );
         
         m_Shader->Bind();
-        //m_Shader->SetUniformInt( "texture_sampler", 0 );
+        m_Shader->SetUniformInt( "material.diffuse", 0 );
+        m_Shader->SetUniformVec3( "material.specular", glm::vec3( 0.3f ) );
         m_Shader->SetUniformMat4( "u_Projection", Projection );
         m_Shader->SetUniformMat4( "u_View", View );
         m_Shader->SetUniformMat4( "u_Model", Model );
-        m_Shader->SetUniformVec3( "u_CameraPos", m_CameraController.GetCamera().GetPosition() );
         
+        m_Shader->SetUniformVec3( "u_ViewPos", m_CameraController.GetCamera().GetPosition() );
+
+        m_Shader->SetUniformVec3( "light.position", glm::vec3( 5.0f ) );
+        m_Shader->SetUniformVec3( "light.ambient", glm::vec3( 0.2f ) );
+        m_Shader->SetUniformVec3( "light.diffuse", glm::vec3( 0.5f ) );
+        m_Shader->SetUniformVec3( "light.specular", glm::vec3( 1.0f ) );
+
+        /*
         glBindVertexArray( m_VAO );
-        m_SkyboxTexture->Bind();
+        m_Texture->Bind( 0 );
         glDrawArrays( GL_TRIANGLES, 0, 36 );
         glBindVertexArray( 0 );
+        */
+
         // floor
-        /*
         glBindVertexArray( m_PlaneVAO );
         m_Shader->SetUniformMat4( "u_Model", glm::mat4( 1.0f ) );
         m_PlaneTexture->Bind( 0 );
         glDrawArrays( GL_TRIANGLES, 0, 6 );
         glBindVertexArray( 0 );
-        */
-        // make depthFunc passes when values are equal to depth buffer's content
-        glDepthFunc( GL_LEQUAL );
-        m_SkyboxShader->Bind();
-        // remove translation from the ViewMatrix
-        View = glm::mat4( glm::mat3( m_CameraController.GetCamera().GetViewMatrix() ) );
-        Model = glm::mat4( 1.0f );
-        //m_SkyboxShader->SetUniformInt( "skybox", 0 );
-        m_SkyboxShader->SetUniformMat4( "u_Projection", Projection );
-        m_SkyboxShader->SetUniformMat4( "u_View", View );
-        m_SkyboxShader->SetUniformMat4( "u_Model", Model );
-        glBindVertexArray( m_SkyboxVAO );
-        m_SkyboxTexture->Bind();
-        glDrawArrays( GL_TRIANGLES, 0, 36 );
-        glBindVertexArray( 0 );
-        // back to default
-        glDepthFunc( GL_LESS );
         
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );
         glDisable( GL_DEPTH_TEST );
-        
+
         glClear( GL_COLOR_BUFFER_BIT );
         
         m_ScreenShader->Bind();
@@ -197,7 +165,7 @@ public:
         glBindVertexArray( m_QuadVAO );
         glBindTexture( GL_TEXTURE_2D, m_TextureColorBuffer );
         glDrawArrays( GL_TRIANGLES, 0, 6 );
-          
+    
     }
     
     virtual void OnEvent( Event& e ) override {
@@ -210,15 +178,12 @@ private:
     CameraController m_CameraController;
     std::shared_ptr<CShader> m_Shader;
     std::shared_ptr<CShader> m_ScreenShader;
-    std::shared_ptr<CShader> m_SkyboxShader;
     std::shared_ptr<Texture2D> m_Texture;
     std::shared_ptr<Texture2D> m_PlaneTexture;
-    std::shared_ptr<Texture2D> m_SkyboxTexture;
     unsigned int m_VAO, m_VBO;
     int m_FBO;
     unsigned int m_QuadVAO, m_QuadVBO;
     unsigned int m_Framebuffer, m_TextureColorBuffer, m_RBO;
     unsigned int m_PlaneVAO, m_PlaneVBO;
-    unsigned int m_SkyboxVAO, m_SkyboxVBO;
 
 };

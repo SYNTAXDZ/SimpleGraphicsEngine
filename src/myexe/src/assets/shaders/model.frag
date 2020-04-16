@@ -3,14 +3,16 @@
 layout(location = 0) out vec4 color;
 // out vec4 color;
 
-in vec3 v_TexCoords;
+in vec2 v_TexCoords;
 
-uniform samplerCube skybox;
+uniform sampler2D texture_diffuse1;
+//uniform sampler2D skybox;
+
 
 void main() {
 	
     
     // dont't forget to flip the uv's
-    color = texture( skybox, -1*v_TexCoords );
+    color = texture( texture_diffuse1, v_TexCoords );
 
 }
