@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 #include "stb_image.h"
 
-#include <glad/glad.h>
+//#include <glad/glad.h>
 
 #include <iostream>
 
@@ -11,7 +11,7 @@ Texture2D::Texture2D( const std::string& path ) : m_Path( path ) {
 
     int width, height, channels;
 
-    stbi_set_flip_vertically_on_load( 1 );
+    //stbi_set_flip_vertically_on_load( 1 );
 
     stbi_uc* data = stbi_load( path.c_str(), &width, &height, &channels, 0 );
 
@@ -33,20 +33,166 @@ Texture2D::Texture2D( const std::string& path ) : m_Path( path ) {
         internalFormat = GL_RGB8;
         dataFormat = GL_RGB;
 
+    } else if( channels == 1 ) {
+
+        internalFormat = GL_RED;
+        dataFormat = GL_RED;
+
     }
 
-    glGenTextures( 1, &m_RendererID );
-    glBindTexture( GL_TEXTURE_2D, m_RendererID );
-    glTexStorage2D( GL_TEXTURE_2D, 1, internalFormat, m_Width, m_Height );
+    if( data ) {
+
+        glGenTextures( 1, &m_RendererID );
+        glBindTexture( GL_TEXTURE_2D, m_RendererID );
+        glTexStorage2D( GL_TEXTURE_2D, 1, internalFormat, m_Width, m_Height );
+        //glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, m_Width, m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, data );
+        
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );  
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data );
+        
+        stbi_image_free( data );
+    }
+    //glGenerateMipmap( GL_TEXTURE_2D );
+
     
+    //glBindTexture( GL_TEXTURE_2D, 0 );
+
+}
+
+unsigned int Texture2D::LoadTexture2D( const std::string& path ) {
+    
+    unsigned int textureID;
+    glGenTextures( 1, &textureID );
+    glBindTexture( GL_TEXTURE_2D, textureID );
+
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );  
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data );
+
+    int width, height, channels;
+
+    stbi_set_flip_vertically_on_load( 1 );
+
+    stbi_uc* data = stbi_load( path.c_str(), &width, &height, &channels, 0 );
+    
+    if( !data )
+        std::cout << "texture not found \n";
+    
+    GLenum internalFormat = 0, dataFormat = 0;
+
+    if( channels == 4 ) {
+
+        internalFormat = GL_RGBA8;
+        dataFormat = GL_RGBA;
+
+    } else if( channels == 3 ) {
+
+        internalFormat = GL_RGB8;
+        dataFormat = GL_RGB;
+
+    } else if( channels == 1 ) {
+
+        internalFormat = GL_RED;
+        dataFormat = GL_RED;
+
+    }
+
+    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data );
+    //glGenerateMipmap( GL_TEXTURE_2D );
     
     stbi_image_free( data );
-    glBindTexture( GL_TEXTURE_2D, 0 );
+    
+    return textureID;
+
+} 
+
+
+unsigned int Texture2D::LoadTextureHDR( const std::string& path ) {
+
+    stbi_set_flip_vertically_on_load( true );
+    int width, height, nrComponents;
+    // maps the HDR values to a list of floating point values: 32 bits per channel
+    // and 3 channels per color by default.
+    float *data = stbi_loadf( path.c_str(), &width, &height, &nrComponents, 0 );
+
+    unsigned int hdrTexture;
+
+    if( data ) {
+    
+        glGenTextures( 1, &hdrTexture );
+        glBindTexture( GL_TEXTURE_2D, hdrTexture );
+        // Load The Texture Of Type FLOAT
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+        stbi_image_free(data);
+
+    } else {
+
+        std::cout << "Failed to load HDR image." << std::endl;
+    
+    }
+
+    return hdrTexture;
+
+} 
+
+unsigned int Texture2D::LoadEmptyCubemap() {
+    
+    unsigned int envCubemap;
+    glGenTextures( 1, &envCubemap );
+    glBindTexture( GL_TEXTURE_CUBE_MAP, envCubemap );
+
+    for( unsigned int i = 0; i < 6; ++i ) {
+
+        // note that we store each face with 16 bit floating point values
+        glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+                      512, 512, 0, GL_RGB, GL_FLOAT, nullptr );
+        
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    return envCubemap;
+    
+}
+
+/*
+ As the irradiance map averages all surrounding radiance uniformly it doesn’t have a lot of high
+ frequency details so we can store the map at a low resolution (32x32) and let OpenGL’s linear
+ filtering do most of the work.
+*/
+unsigned int Texture2D::LoadIrradinaceMap() {
+
+    unsigned int irradianceMap;
+
+    glGenTextures( 1, &irradianceMap );
+    glBindTexture( GL_TEXTURE_CUBE_MAP, irradianceMap );
+
+    for( unsigned int i = 0; i < 6; ++i ) {
+
+        glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr );
+
+    }
+
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    return irradianceMap;
 
 }
 
@@ -146,11 +292,30 @@ Texture2D::Texture2D( std::vector<std::string> faces ) {
     
 }
 
-Texture2D::~Texture2D() {
+void Texture2D::Release() {
 
     glDeleteTextures( 1, &m_RendererID );
+    m_RendererID = 0;
 
 }
+
+Texture2D::~Texture2D() {
+
+    Release();
+
+}
+
+void Texture2D::TextureParameter( GLenum type, GLenum pname, GLint param ) {
+
+    GLuint boundTexture = 0;
+    glGetIntegerv( GL_TEXTURE_BINDING_2D, (GLint*) &boundTexture);
+    //glGetIntegerv( GL_TEXTURE_BINDING_CUBE_MAP, (GLint*) &boundTexture);
+    glBindTexture( type, m_RendererID );
+    glTexParameteri( type, pname, param );
+    glBindTexture( type, boundTexture );
+
+}
+
 
 void Texture2D::Bind( unsigned int slot ) const {
 

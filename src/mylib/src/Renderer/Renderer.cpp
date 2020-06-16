@@ -4,10 +4,11 @@
 using namespace ENGINE;
 
 void Renderer::Init() {
-
-    glEnable( GL_BLEND );
+    
     glEnable( GL_DEPTH_TEST );
-    glEnable( GL_STENCIL_TEST );
+    glDepthFunc( GL_LEQUAL );
+    glEnable( GL_BLEND );
+    //glEnable( GL_STENCIL_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 

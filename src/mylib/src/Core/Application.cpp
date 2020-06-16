@@ -27,7 +27,7 @@ Application::Application() {
     m_Window->SetEventCallback( eventCallback );
 
     Renderer::Init();
-    Renderer::SetViewport( 0, 0, m_Window->GetWidth(), m_Window->GetHeight() );
+    //Renderer::SetViewport( 0, 0, m_Window->GetWidth(), m_Window->GetHeight() );
 
 }
 

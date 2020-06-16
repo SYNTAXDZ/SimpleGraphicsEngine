@@ -27,7 +27,7 @@ sources = c.stdout().strip().split('\n')
 mylib = library( 'mylib',
                   sources: sources,
                   dependencies: my_dep,
-                  cpp_pch: 'pch/pch.hpp')
+                )
 
 mylib_dep = declare_dependency(dependencies: my_dep,
                                include_directories : include_directories('src/'), link_with : mylib)
