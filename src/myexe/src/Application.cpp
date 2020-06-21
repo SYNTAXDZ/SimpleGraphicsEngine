@@ -7,7 +7,9 @@
 //#include "HdrLayer.hpp"
 //#include "PBR.hpp"
 //#include "PBR_IBL.hpp"
-#include "PBR_IBL_specular.hpp"
+//#include "PBR_IBL_specular.hpp"
+#include "PBR_IBL_textured.hpp"
+
 
 using namespace ENGINE;
 
@@ -21,7 +23,9 @@ public:
         //PushLayer( new CubemapLayer() );
         //PushLayer( new HDRLayer() );
         //PushLayer( new PBRIBLLayer() );
-        PushLayer( new PBRIBLSpecularLayer() );
+        //PushLayer( new PBRIBLSpecularLayer() );
+        PushLayer( new PBRIBLTexturedLayer() );
+
 
     }
     ~Sandbox() {}
