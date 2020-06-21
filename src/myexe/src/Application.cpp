@@ -6,7 +6,8 @@
 //#include "NormalMap.hpp"
 //#include "HdrLayer.hpp"
 //#include "PBR.hpp"
-#include "PBR_IBL.hpp"
+//#include "PBR_IBL.hpp"
+#include "PBR_IBL_specular.hpp"
 
 using namespace ENGINE;
 
@@ -19,7 +20,8 @@ public:
         //PushLayer( new NormalMappingingLayer() );
         //PushLayer( new CubemapLayer() );
         //PushLayer( new HDRLayer() );
-        PushLayer( new PBRIBLLayer() );
+        //PushLayer( new PBRIBLLayer() );
+        PushLayer( new PBRIBLSpecularLayer() );
 
     }
     ~Sandbox() {}

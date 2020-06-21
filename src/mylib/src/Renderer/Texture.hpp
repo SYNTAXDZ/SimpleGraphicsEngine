@@ -21,7 +21,7 @@ namespace ENGINE {
 
         Texture2D( Texture2D &&other ) : m_RendererID( other.m_RendererID ) {
 
-            other.m_RendererID;
+            this->m_RendererID =  other.m_RendererID;
 
             //return *this;
 
@@ -47,6 +47,10 @@ namespace ENGINE {
         // Load An Irradiance Map
         static unsigned int LoadIrradinaceMap();
 
+        static unsigned int LoadPreFilteredMap();
+        
+        static unsigned int LoadLutTexture();
+        
         inline unsigned int GetID() const { return m_RendererID; }
 
         inline unsigned int GetWidth() const { return m_Width; }

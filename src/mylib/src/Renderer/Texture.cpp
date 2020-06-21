@@ -161,7 +161,7 @@ unsigned int Texture2D::LoadEmptyCubemap() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     return envCubemap;
@@ -194,6 +194,46 @@ unsigned int Texture2D::LoadIrradinaceMap() {
 
     return irradianceMap;
 
+}
+
+unsigned int Texture2D::LoadPreFilteredMap() {
+
+    unsigned int prefilterMap;
+    glGenTextures( 1, &prefilterMap );
+    glBindTexture( GL_TEXTURE_CUBE_MAP, prefilterMap );
+
+    for( unsigned int i = 0; i < 6; ++i ) {
+
+        glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr );
+    
+    }
+
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );  
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glGenerateMipmap( GL_TEXTURE_CUBE_MAP );
+
+    return prefilterMap;
+
+}
+
+
+unsigned int ENGINE::Texture2D::LoadLutTexture() {
+    
+    unsigned int brdfLUTTexture = 0;
+    glGenTextures( 1, &brdfLUTTexture );
+    // pre-allocate enough memory for the LUT texture.
+    glBindTexture( GL_TEXTURE_2D, brdfLUTTexture );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, 0 );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+   
+    return brdfLUTTexture;
+    
 }
 
 Texture2D::Texture2D( const std::string& path, bool isGammaCorrected ) : m_Path( path ) {
